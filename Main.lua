@@ -1,9 +1,10 @@
--- Steal an Egg: Pro Finder (Live Restock Timer + Minimize Button + Compact UI)
+-- Steal an Egg: Pro Finder (Live Game Timer Sync + UI)
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local CoreGui = game:GetService("CoreGui")
 local StarterGui = game:GetService("StarterGui")
 local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
 -- تنظيف الواجهة القديمة
 if CoreGui:FindFirstChild("SyncFinderPro") then
@@ -46,12 +47,12 @@ TopBarFix.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
 TopBarFix.BorderSizePixel = 0
 TopBarFix.Parent = TopBar
 
--- عنوان مع العداد التنازلي (Timer)
+-- عنوان مع العداد المتزامن من اللعبة
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(0, 230, 1, 0)
 Title.Position = UDim2.new(0, 12, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "✨ PRO FINDER | Restock: 5:00"
+Title.Text = "✨ FINDER | Restock: Syncing..."
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 12
@@ -232,16 +233,33 @@ end)
 
 PerformScan(false)
 
--- عداد تنازلي متزامن كل 5 دقائق (300 ثانية) يظهر بالدقائق والثواني في العنوان
-task.spawn(function()
-    local restockTime = 300
-    while true do
-        for i = restockTime, 1, -1 do
-            local mins = math.floor(i / 60)
-            local secs = i % 60
-            Title.Text = string.format("✨ FINDER | Restock: %d:%02d", mins, secs)
-            task.wait(1)
+-- دالة للبحث عن وقت اللعبة الأصلي ومامنته بالسكربت ديناميكياً
+local function FindGameTimerText()
+    for _, desc in pairs(PlayerGui:GetDescendants()) do
+        if desc:IsA("TextLabel") or desc:IsA("TextButton") then
+            local txt = desc.Text
+            if txt and (txt:find("in %d+m") or txt:find("in %d+s") or txt:match("%d+m %d+s")) then
+                return txt
+            end
         end
-        PerformScan(true)
+    end
+    return nil
+end
+
+-- حلقة التحديث والمزامنة مع واجهة اللعبة الأصلية
+task.spawn(function()
+    while true do
+        task.wait(1)
+        local gameTimeStr = FindGameTimerText()
+        if gameTimeStr then
+            Title.Text = "✨ FINDER | Restock: " .. gameTimeStr
+            -- إذا انتهى العداد أو ظهرت كلمة تدل على الريستوك يقوم بالفحص تلقائياً
+            if gameTimeStr:find("0m 0s") or gameTimeStr:find("in 0s") then
+                PerformScan(true)
+                task.wait(2) -- تجنب التكرار السريع في نفس الثانية
+            end
+        else
+            Title.Text = "✨ FINDER | Restock: Live"
+        end
     end
 end)
