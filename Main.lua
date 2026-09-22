@@ -1,17 +1,17 @@
--- Steal an Egg: Pro Finder (Live Game Timer Sync + UI)
+-- Steal an Egg: Chat-Triggered Pro Finder
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local CoreGui = game:GetService("CoreGui")
 local StarterGui = game:GetService("StarterGui")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local LocalPlayer = Players.LocalPlayer
-local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
 -- تنظيف الواجهة القديمة
 if CoreGui:FindFirstChild("SyncFinderPro") then
     CoreGui.SyncFinderPro:Destroy()
 end
 
--- 1. إنشاء واجهة عريضة وصغيرة
+-- 1. إنشاء الواجهة الاحترافية المصغرة والعريضة
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "SyncFinderPro"
 ScreenGui.Parent = CoreGui
@@ -47,12 +47,11 @@ TopBarFix.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
 TopBarFix.BorderSizePixel = 0
 TopBarFix.Parent = TopBar
 
--- عنوان مع العداد المتزامن من اللعبة
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(0, 230, 1, 0)
 Title.Position = UDim2.new(0, 12, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "✨ FINDER | Restock: Syncing..."
+Title.Text = "✨ FINDER | Chat Hooked"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 12
@@ -102,7 +101,7 @@ UIListLayout.Parent = ScrollList
 UIListLayout.Padding = UDim.new(0, 6)
 UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
--- متغير إخفاء الواجهة
+-- إخفاء وإظهار الواجهة
 local isMinimized = false
 MinimizeBtn.MouseButton1Click:Connect(function()
     isMinimized = not isMinimized
@@ -119,7 +118,7 @@ MinimizeBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- تحويل القيم
+-- تحويل القيم الرقمية
 local function ParseValue(val)
     if type(val) == "number" then return val end
     if type(val) ~= "string" then return 0 end
@@ -129,7 +128,7 @@ local function ParseValue(val)
     return num
 end
 
--- إضافة البطاقات
+-- إضافة البطاقات للجدول
 local function AddCard(name, valueText, targetObj)
     local Card = Instance.new("Frame")
     Card.Size = UDim2.new(1, 0, 0, 50)
@@ -176,15 +175,15 @@ local function AddCard(name, valueText, targetObj)
     end)
 end
 
--- فحص السيرفر
-local function PerformScan(isAutoScan)
+-- دالة الفحص الشامل للماب
+local function PerformScan()
     for _, obj in pairs(ScrollList:GetChildren()) do
         if obj:IsA("Frame") or obj:IsA("TextLabel") then obj:Destroy() end
     end
 
     local count = 0
     for _, obj in pairs(Workspace:GetChildren()) do
-        if count >= 4 then break end 
+        if count >= 5 then break end 
 
         local valObj = obj:FindFirstChild("Value") or obj:FindFirstChild("Income") or obj:FindFirstChild("Cash")
         if valObj then
@@ -199,67 +198,34 @@ local function PerformScan(isAutoScan)
     if count == 0 then
         local NoItem = Instance.new("TextLabel")
         NoItem.Size = UDim2.new(1, 0, 0, 40)
-        NoItem.Text = "لا يوجد سيكريت +1B حالياً. جاري انتظار الـ Restock..."
+        NoItem.Text = "لا يوجد سيكريت +1B حالياً. في انتظار ظهور رسالة الشات..."
         NoItem.TextColor3 = Color3.fromRGB(150, 150, 150)
         NoItem.Font = Enum.Font.Gotham
         NoItem.TextSize = 12
         NoItem.BackgroundTransparency = 1
         NoItem.Parent = ScrollList
-        
-        if isAutoScan then
-            StarterGui:SetCore("SendNotification", {
-                Title = "Restock Update 🥚",
-                Text = "لايوجد اي حيوان حاليا رسبن",
-                Duration = 5
-            })
-        end
-    else
-        if isAutoScan then
-            StarterGui:SetCore("SendNotification", {
-                Title = "🚨 رسبن نادر! 🚨",
-                Text = "تم نزول حيوان يعطي فوق 1B!",
-                Duration = 7
-            })
-        end
     end
 end
 
 RefreshBtn.MouseButton1Click:Connect(function()
     RefreshBtn.Text = "..."
-    PerformScan(false)
+    PerformScan()
     task.wait(0.3)
     RefreshBtn.Text = "Refresh 🔄"
 end)
 
-PerformScan(false)
+PerformScan()
 
--- دالة للبحث عن وقت اللعبة الأصلي ومامنته بالسكربت ديناميكياً
-local function FindGameTimerText()
-    for _, desc in pairs(PlayerGui:GetDescendants()) do
-        if desc:IsA("TextLabel") or desc:IsA("TextButton") then
-            local txt = desc.Text
-            if txt and (txt:find("in %d+m") or txt:find("in %d+s") or txt:match("%d+m %d+s")) then
-                return txt
-            end
-        end
-    end
-    return nil
-end
-
--- حلقة التحديث والمزامنة مع واجهة اللعبة الأصلية
+-- رصد رسائل الشات الخاصة باللعبة (عندما تظهر رسالة رسبن السيكريت، يتم تحديث القائمة وإعطائك تنبيه فوري)
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 task.spawn(function()
     while true do
         task.wait(1)
-        local gameTimeStr = FindGameTimerText()
-        if gameTimeStr then
-            Title.Text = "✨ FINDER | Restock: " .. gameTimeStr
-            -- إذا انتهى العداد أو ظهرت كلمة تدل على الريستوك يقوم بالفحص تلقائياً
-            if gameTimeStr:find("0m 0s") or gameTimeStr:find("in 0s") then
-                PerformScan(true)
-                task.wait(2) -- تجنب التكرار السريع في نفس الثانية
+        for _, desc in pairs(PlayerGui:GetDescendants()) do
+            if desc:IsA("TextLabel") and (desc.Text:find("Secret") or desc.Text:find("spawned")) then
+                -- التحقق من أن الرسالة حديثة وليست قديمة
+                PerformScan()
             end
-        else
-            Title.Text = "✨ FINDER | Restock: Live"
         end
     end
 end)
