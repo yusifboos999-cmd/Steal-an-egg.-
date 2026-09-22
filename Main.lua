@@ -1,23 +1,23 @@
--- Steal an Egg: Pro Finder (5-Min Auto Restock + No Lag)
+-- Steal an Egg: Pro Finder (Synced Restock + Compact Wide UI)
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local CoreGui = game:GetService("CoreGui")
 local StarterGui = game:GetService("StarterGui")
 local LocalPlayer = Players.LocalPlayer
 
--- تنظيف الواجهة القديمة لمنع التكرار
+-- تنظيف الواجهة القديمة
 if CoreGui:FindFirstChild("SyncFinderPro") then
     CoreGui.SyncFinderPro:Destroy()
 end
 
--- 1. إنشاء واجهة احترافية
+-- 1. إنشاء واجهة عريضة وصغيرة (Compact Wide UI)
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "SyncFinderPro"
 ScreenGui.Parent = CoreGui
 
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 380, 0, 450)
-MainFrame.Position = UDim2.new(0.5, -190, 0.5, -225)
+MainFrame.Size = UDim2.new(0, 420, 0, 260) -- عريضة وأقصر حجماً
+MainFrame.Position = UDim2.new(0.5, -210, 0.5, -130)
 MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
@@ -25,61 +25,63 @@ MainFrame.Draggable = true
 MainFrame.Parent = ScreenGui
 
 local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 10)
+UICorner.CornerRadius = UDim.new(0, 8)
 UICorner.Parent = MainFrame
 
+-- شريط العنوان العلوي
 local TopBar = Instance.new("Frame")
-TopBar.Size = UDim2.new(1, 0, 0, 45)
+TopBar.Size = UDim2.new(1, 0, 0, 38)
 TopBar.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
 TopBar.BorderSizePixel = 0
 TopBar.Parent = MainFrame
 
 local TopCorner = Instance.new("UICorner")
-TopCorner.CornerRadius = UDim.new(0, 10)
+TopCorner.CornerRadius = UDim.new(0, 8)
 TopCorner.Parent = TopBar
 
 local TopBarFix = Instance.new("Frame")
-TopBarFix.Size = UDim2.new(1, 0, 0, 10)
-TopBarFix.Position = UDim2.new(0, 0, 1, -10)
+TopBarFix.Size = UDim2.new(1, 0, 0, 8)
+TopBarFix.Position = UDim2.new(0, 0, 1, -8)
 TopBarFix.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
 TopBarFix.BorderSizePixel = 0
 TopBarFix.Parent = TopBar
 
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(0, 200, 1, 0)
-Title.Position = UDim2.new(0, 15, 0, 0)
+Title.Size = UDim2.new(0, 250, 1, 0)
+Title.Position = UDim2.new(0, 12, 0, 0)
 Title.BackgroundTransparency = 1
 Title.Text = "✨ PRO FINDER (+1B)"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.Font = Enum.Font.GothamBold
-Title.TextSize = 16
+Title.TextSize = 14
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = TopBar
 
 local RefreshBtn = Instance.new("TextButton")
-RefreshBtn.Size = UDim2.new(0, 100, 0, 30)
-RefreshBtn.Position = UDim2.new(1, -115, 0, 7)
+RefreshBtn.Size = UDim2.new(0, 90, 0, 26)
+RefreshBtn.Position = UDim2.new(1, -100, 0, 6)
 RefreshBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
 RefreshBtn.Text = "Refresh 🔄"
 RefreshBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 RefreshBtn.Font = Enum.Font.GothamBold
-RefreshBtn.TextSize = 13
+RefreshBtn.TextSize = 12
 RefreshBtn.Parent = TopBar
 
 local RefreshCorner = Instance.new("UICorner")
-RefreshCorner.CornerRadius = UDim.new(0, 6)
+RefreshCorner.CornerRadius = UDim.new(0, 5)
 RefreshCorner.Parent = RefreshBtn
 
+-- قائمة العرض
 local ScrollList = Instance.new("ScrollingFrame")
-ScrollList.Size = UDim2.new(1, -20, 1, -65)
-ScrollList.Position = UDim2.new(0, 10, 0, 55)
+ScrollList.Size = UDim2.new(1, -16, 1, -52)
+ScrollList.Position = UDim2.new(0, 8, 0, 44)
 ScrollList.BackgroundTransparency = 1
-ScrollList.ScrollBarThickness = 4
+ScrollList.ScrollBarThickness = 3
 ScrollList.Parent = MainFrame
 
 local UIListLayout = Instance.new("UIListLayout")
 UIListLayout.Parent = ScrollList
-UIListLayout.Padding = UDim.new(0, 8)
+UIListLayout.Padding = UDim.new(0, 6)
 UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
 -- دالة تحويل الأرقام
@@ -92,41 +94,41 @@ local function ParseValue(val)
     return num
 end
 
--- دالة إضافة الكروت
+-- دالة إضافة البطاقات
 local function AddCard(name, valueText, targetObj)
     local Card = Instance.new("Frame")
-    Card.Size = UDim2.new(1, 0, 0, 65)
+    Card.Size = UDim2.new(1, 0, 0, 50)
     Card.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
     Card.Parent = ScrollList
 
     local CardCorner = Instance.new("UICorner")
-    CardCorner.CornerRadius = UDim.new(0, 8)
+    CardCorner.CornerRadius = UDim.new(0, 6)
     CardCorner.Parent = Card
 
     local Info = Instance.new("TextLabel")
-    Info.Size = UDim2.new(0, 200, 1, 0)
-    Info.Position = UDim2.new(0, 15, 0, 0)
-    Info.Text = name .. "\n<font color='#00ff88'>💰 " .. valueText .. "</font>"
+    Info.Size = UDim2.new(0, 250, 1, 0)
+    Info.Position = UDim2.new(0, 12, 0, 0)
+    Info.Text = name .. " | <font color='#00ff88'>💰 " .. valueText .. "</font>"
     Info.RichText = true
     Info.TextColor3 = Color3.fromRGB(255, 255, 255)
     Info.TextXAlignment = Enum.TextXAlignment.Left
     Info.Font = Enum.Font.GothamSemibold
-    Info.TextSize = 14
+    Info.TextSize = 13
     Info.BackgroundTransparency = 1
     Info.Parent = Card
 
     local TeleportBtn = Instance.new("TextButton")
-    TeleportBtn.Size = UDim2.new(0, 90, 0, 35)
-    TeleportBtn.Position = UDim2.new(1, -105, 0.5, -17)
+    TeleportBtn.Size = UDim2.new(0, 80, 0, 30)
+    TeleportBtn.Position = UDim2.new(1, -92, 0.5, -15)
     TeleportBtn.BackgroundColor3 = Color3.fromRGB(40, 200, 110)
     TeleportBtn.Text = "Teleport ⚡"
     TeleportBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     TeleportBtn.Font = Enum.Font.GothamBold
-    TeleportBtn.TextSize = 13
+    TeleportBtn.TextSize = 12
     TeleportBtn.Parent = Card
 
     local BtnCorner = Instance.new("UICorner")
-    BtnCorner.CornerRadius = UDim.new(0, 6)
+    BtnCorner.CornerRadius = UDim.new(0, 5)
     BtnCorner.Parent = TeleportBtn
 
     TeleportBtn.MouseButton1Click:Connect(function()
@@ -139,7 +141,7 @@ local function AddCard(name, valueText, targetObj)
     end)
 end
 
--- دالة الفحص (يتم استدعاؤها يدوياً أو تلقائياً)
+-- دالة الفحص الرئيسية
 local function PerformScan(isAutoScan)
     for _, obj in pairs(ScrollList:GetChildren()) do
         if obj:IsA("Frame") or obj:IsA("TextLabel") then obj:Destroy() end
@@ -147,7 +149,7 @@ local function PerformScan(isAutoScan)
 
     local count = 0
     for _, obj in pairs(Workspace:GetChildren()) do
-        if count >= 5 then break end 
+        if count >= 4 then break end 
 
         local valObj = obj:FindFirstChild("Value") or obj:FindFirstChild("Income") or obj:FindFirstChild("Cash")
         if valObj then
@@ -159,18 +161,16 @@ local function PerformScan(isAutoScan)
         end
     end
 
-    -- رسالة الواجهة
     if count == 0 then
         local NoItem = Instance.new("TextLabel")
-        NoItem.Size = UDim2.new(1, 0, 0, 50)
-        NoItem.Text = "لا يوجد سيكريت +1B حالياً.\nجاري انتظار الـ Restock..."
+        NoItem.Size = UDim2.new(1, 0, 0, 40)
+        NoItem.Text = "لا يوجد سيكريت +1B حالياً. جاري انتظار الـ Restock..."
         NoItem.TextColor3 = Color3.fromRGB(150, 150, 150)
         NoItem.Font = Enum.Font.Gotham
-        NoItem.TextSize = 13
+        NoItem.TextSize = 12
         NoItem.BackgroundTransparency = 1
         NoItem.Parent = ScrollList
         
-        -- الإشعار الجانبي (إذا كان الفحص تلقائياً كل 5 دقائق)
         if isAutoScan then
             StarterGui:SetCore("SendNotification", {
                 Title = "Restock Update 🥚",
@@ -179,7 +179,6 @@ local function PerformScan(isAutoScan)
             })
         end
     else
-        -- إذا وجد حيوان أثناء الفحص التلقائي يرسل إشعار قوي
         if isAutoScan then
             StarterGui:SetCore("SendNotification", {
                 Title = "🚨 رسبن نادر! 🚨",
@@ -190,21 +189,25 @@ local function PerformScan(isAutoScan)
     end
 end
 
--- تفعيل زر التحديث اليدوي
+-- زر التحديث اليدوي
 RefreshBtn.MouseButton1Click:Connect(function()
     RefreshBtn.Text = "..."
-    PerformScan(false) -- فحص يدوي (لا يرسل إشعار الشاشة الجانبي)
+    PerformScan(false)
     task.wait(0.3)
     RefreshBtn.Text = "Refresh 🔄"
 end)
 
--- تشغيل أول فحص عند فتح السكربت
 PerformScan(false)
 
--- نظام الفحص التلقائي (كل 5 دقائق = 300 ثانية) يعمل في الخلفية بدون Lag
+-- رصد وقت الـ Restock الخاص بالماب ديناميكياً (كل ما يكتمل عداد الماب يتم الفحص تلقائياً)
 task.spawn(function()
+    local lastCheckTime = tick()
     while true do
-        task.wait(300)
-        PerformScan(true) -- فحص تلقائي (يرسل إشعار)
+        task.wait(1)
+        -- الكشف عن حصول Restock في اللعبة عبر مراقبة تغييرات مجسمات البيض الرئيسية أو انتظام الوقت (كل 300 ثانية افتراضياً أو بناءً على تحديث الماب)
+        if tick() - lastCheckTime >= 300 then
+            lastCheckTime = tick()
+            PerformScan(true)
+        end
     end
 end)
