@@ -1,19 +1,18 @@
--- Steal an Egg: One-Click Server Hop & Auto Check
+-- Steal an Egg: Clean Server Hop (No Error 279)
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local CoreGui = game:GetService("CoreGui")
 local TeleportService = game:GetService("TeleportService")
-local HttpService = game:GetService("HttpService")
 local StarterGui = game:GetService("StarterGui")
 local LocalPlayer = Players.LocalPlayer
 
-if CoreGui:FindFirstChild("OneClickHopper") then
-    CoreGui.OneClickHopper:Destroy()
+if CoreGui:FindFirstChild("CleanHopper") then
+    CoreGui.CleanHopper:Destroy()
 end
 
--- واجهة بسيطة جداً وصغيرة زر واحد فقط
+-- واجهة بسيطة زر واحد فقط
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "OneClickHopper"
+ScreenGui.Name = "CleanHopper"
 ScreenGui.Parent = CoreGui
 
 local MainFrame = Instance.new("Frame")
@@ -43,30 +42,17 @@ local BtnCorner = Instance.new("UICorner")
 BtnCorner.CornerRadius = UDim.new(0, 6)
 BtnCorner.Parent = HopBtn
 
--- دالة تغيير السيرفر بضغطة زر
+-- الانتقال الآمن لتجنب خطأ 279
 HopBtn.MouseButton1Click:Connect(function()
     HopBtn.Text = "جاري النقل..."
     pcall(function()
-        local servers = {}
-        local req = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"))
-        if req and req.data then
-            for _, s in pairs(req.data) do
-                if type(s) == "table" and s.playing < s.maxPlayers and s.id ~= game.JobId then
-                    table.insert(servers, s.id)
-                end
-            end
-        end
-        if #servers > 0 then
-            TeleportService:TeleportToPlaceInstance(game.PlaceId, servers[math.random(1, #servers)], LocalPlayer)
-        else
-            TeleportService:Teleport(game.PlaceId, LocalPlayer)
-        end
+        TeleportService:Teleport(game.PlaceId, LocalPlayer)
     end)
 end)
 
 -- فحص تلقائي فور دخول أي سيرفر جديد
 task.spawn(function()
-    task.wait(3) -- انتظار تحميل الماب
+    task.wait(3)
     local function ParseValue(val)
         if type(val) == "number" then return val end
         if type(val) ~= "string" then return 0 end
